@@ -9,7 +9,7 @@ import scipy.stats
 
 
 def _get_log_likelihood(samples, pi, lambd):
-    """Get the likelihood."""
+    """Get the log-likelihood."""
     log_like = 0.0
     for sample in samples:
         log_like += math.log(_zip_pmf(sample, pi, lambd))
@@ -30,7 +30,7 @@ def _zip_pmf(x, pi, lambd):
 
 def zip_em():
     """ZIP EM."""
-    num_datasets = 100
+    num_datasets = 10
     num_samples = 100
     # NOTE(brendan): ground truth values.
     pi_gt = 0.3
@@ -56,7 +56,7 @@ def zip_em():
     for i in range(num_datasets):
         axes[i].hist(samples[i], bins=len(support_vals))
 
-    # plt.show(fig)
+    plt.show(fig)
 
     gamma_hat = np.zeros(num_samples)
 
@@ -73,8 +73,9 @@ def zip_em():
         log_likelihoods.append(log_like)
 
         while True:
-            # E step. Compute responsibilities (expected value of the proportion of
-            # samples drawn from the distribution that always draws x == 0).
+            # E step. Compute responsibilities (expected value of the
+            # proportion of samples drawn from the distribution that always
+            # draws x == 0).
             for i in range(num_samples):
                 if samples[set_i, i] == 0:
                     gamma_hat[i] = pi_hat/_zip_pmf(0, pi_hat, lambda_hat)
@@ -104,8 +105,15 @@ def zip_em():
     theta_variance = theta_variance.mean(axis=0)
     theta_mse = (thetas - np.array([pi_gt, lambda_gt]))**2
     theta_mse = theta_mse.mean(axis=0)
-    print('pi: mean {} variance {} MSE {}'.format(theta_mean[0], theta_variance[0], theta_mse[0]))
-    print('lambda: mean {} variance {} MSE {}'.format(theta_mean[1], theta_variance[1], theta_mse[1]))
+    print('pi: mean {} variance {} MSE {}'.format(theta_mean[0],
+                                                  theta_variance[0],
+                                                  theta_mse[0]))
+    print('lambda: mean {} variance {} MSE {}'.format(theta_mean[1],
+                                                      theta_variance[1],
+                                                      theta_mse[1]))
+    iters = np.array([len(log_likes) for log_likes in dataset_log_likes])
+    print(iters)
+    print('mean {} std {}'.format(iters.mean(), iters.std()))
 
 
 if __name__ == '__main__':
